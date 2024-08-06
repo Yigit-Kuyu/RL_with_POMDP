@@ -27,8 +27,8 @@ class Actor(nn.Module):
         
 
     def forward(self, state, hidden):
-        batch_size = state.size(0)
-        seq_len = state.size(1) if state.dim() > 2 else 1
+        batch_size = state.size(0) # optional
+        seq_len = state.size(1) if state.dim() > 2 else 1 # optional
         
         if state.dim() == 2:
             state = state.unsqueeze(1)  
@@ -265,7 +265,7 @@ def test(env, agent, num_episodes=20):
         while not done:
             state_tensor = torch.FloatTensor(state).unsqueeze(0).unsqueeze(0).to(device)
             action, _, hidden = agent.actor.sample(state_tensor, hidden)
-            next_state, reward, done, _, _ = env.step(action.cpu().numpy()[0][0])
+            next_state, reward, done, _, _ = env.step(action.cpu().numpy()[0][0][0])
             next_state = preprocess_state(next_state)
             
             state = next_state
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 
     agent = SACAgent(input_dim, action_dim, hidden_dim, memory_capacity, batch_size,
                      gamma, tau, num_updates, policy_freq, alpha)
-
+    
     # Training phase
     train_rewards, avg_train_rewards = train(env, agent, num_episodes=200)
 
@@ -315,7 +315,8 @@ if __name__ == '__main__':
     plt.plot(avg_train_rewards, label='Average Train Rewards')
     plt.legend()
     plt.show()
-
+    
+    
     # Testing phase
     test_rewards = test(env, agent, num_episodes=20)
 
